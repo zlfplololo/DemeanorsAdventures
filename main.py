@@ -418,9 +418,18 @@ player = Player(250, 250, player_infosheets['sr'], player_infosheets['sl'], play
 	            player_infosheets['wl'], 1)
 background = transform.scale(image.load("animations/sky.jpg"), (500, 500))
 cavebackgrounds = [[Surface(((15+1)*50, 2*50)), (7*50, 35*50)], [Surface((8*50, 50)), (11*50, 34*50)]]
+purplestonebackgrounds = [[Surface((10*50, 5*50)), (30*50, 30*50)]]
 for i in range(len(cavebackgrounds)):
 	for j in range(int(cavebackgrounds[i][0].get_width()//500+1 - (cavebackgrounds[i][0].get_width()//500+1) % 1) if cavebackgrounds[i][0].get_width()/500 % 500 > 0 else int(cavebackgrounds[i][0].get_width()/500 - (cavebackgrounds[i][0].get_width()/500) % 1)):
-		cavebackgrounds[i][0].blit(transform.scale(image.load("animations/cave.png"), (500, 500)), (j*500,0))
+		for g in range(int(cavebackgrounds[i][0].get_height()//500+1 - (cavebackgrounds[i][0].get_height()//500+1) % 1) if cavebackgrounds[i][0].get_height()/500 % 500 > 0 else int(cavebackgrounds[i][0].get_height()/500 - (cavebackgrounds[i][0].get_height()/500) % 1)):
+			cavebackgrounds[i][0].blit(transform.scale(image.load("animations/cave.png"), (500, 500)), (j*500,g*5000))
+
+for i in range(len(purplestonebackgrounds)):
+	for j in range(int(purplestonebackgrounds[i][0].get_width()//500+1 - (purplestonebackgrounds[i][0].get_width()//500+1) % 1) if purplestonebackgrounds[i][0].get_width()/500 % 500 > 0 else int(purplestonebackgrounds[i][0].get_width()/500 - (purplestonebackgrounds[i][0].get_width()/500) % 1)):
+		for g in range(int(purplestonebackgrounds[i][0].get_height()//500+1 - (purplestonebackgrounds[i][0].get_height()//500+1) % 1) if purplestonebackgrounds[i][0].get_height()/500 % 500 > 0 else int(purplestonebackgrounds[i][0].get_height()/500 - (purplestonebackgrounds[i][0].get_height()/500) % 1)):
+			print("done")
+			purplestonebackgrounds[i][0].blit(transform.scale(image.load("animations/purplestone.png"), (500, 500)), (j*500,g*500))
+
 maintextbox = textbox(62, 500-150, 500-124, 100, fonte, (0,0,0), (255, 255, 255), (150, 150, 150))
 sam = Camera(0, 0)
 itemsprites = Spritesheet("animations/rubiesc.png", 17, 3, 9, 9, 18, 18, 1, 1).frames
@@ -488,6 +497,9 @@ while ran:
 	window.blit(background, (0,0))
 	if indexroom == 0:
 		for i in cavebackgrounds:
+			sam.blitwith(i[1][0], i[1][1], i[0])
+	if indexroom == 1:
+		for i in purplestonebackgrounds:
 			sam.blitwith(i[1][0], i[1][1], i[0])
 	for i in rooms[indexroom]:
 		i.draw()
