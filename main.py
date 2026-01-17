@@ -427,12 +427,11 @@ for i in range(len(cavebackgrounds)):
 for i in range(len(purplestonebackgrounds)):
 	for j in range(int(purplestonebackgrounds[i][0].get_width()//500+1 - (purplestonebackgrounds[i][0].get_width()//500+1) % 1) if purplestonebackgrounds[i][0].get_width()/500 % 500 > 0 else int(purplestonebackgrounds[i][0].get_width()/500 - (purplestonebackgrounds[i][0].get_width()/500) % 1)):
 		for g in range(int(purplestonebackgrounds[i][0].get_height()//500+1 - (purplestonebackgrounds[i][0].get_height()//500+1) % 1) if purplestonebackgrounds[i][0].get_height()/500 % 500 > 0 else int(purplestonebackgrounds[i][0].get_height()/500 - (purplestonebackgrounds[i][0].get_height()/500) % 1)):
-			print("done")
 			purplestonebackgrounds[i][0].blit(transform.scale(image.load("animations/purplestone.png"), (500, 500)), (j*500,g*500))
 
 maintextbox = textbox(62, 500-150, 500-124, 100, fonte, (0,0,0), (255, 255, 255), (150, 150, 150))
 sam = Camera(0, 0)
-itemsprites = Spritesheet("animations/rubiesc.png", 17, 3, 9, 9, 18, 18, 1, 1).frames
+itemsprites = Spritesheet("animations/rubies.png", 17, 3, 9, 9, 18, 18, 1, 1).frames
 
 tilemape = tilemap("Sprite-0004.png", 4, 8, 25, 25, 50, 50, 0, 0)
 groundsprites = [
