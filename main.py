@@ -196,8 +196,7 @@ class tilemap():
 					room[i].append(self.ground(map[i][j][0][0], map[i][j][0][1], self.width, self.height, self.tilemap, map[i][j][2], map[i][j][1][1], groundsprites if map[i][j][1][0] == "ground" else mosssprites if map[i][j][1][0] == "moss" else []))	 
 		return room
 
-
-class Player(hitbox):
+class NPC(hitbox):
 	def __init__(self, x, y, infosheet_sr, infosheet_sl, infosheet_wr, infosheet_wl, D):
 		self.check = [0, 0]
 		self.wl = infosheet_wl
@@ -206,13 +205,63 @@ class Player(hitbox):
 		self.sr = infosheet_sr
 		self.fallspeed = 0
 		self.grounded = False
-		self.run = False
-		self.inventar = [None, None, None, None, None, None, None, None, None, None]
-		self.interacted = 0
 		self.d = D
 		self.counter = 0
 		self.IShRN = self.sr if D else self.sl
 		super().__init__(x, y, self.IShRN["hitbox"][0][0], self.IShRN["hitbox"][0][1])
+
+	def Update(self, room):
+		self.gravitate(room)
+		self.updatehitboxes()
+	
+	def gravitate(self, room):
+		global cameray, camerax
+		self.grounded = False
+		for block in room:
+			if self.collides(block) and block.id != 1:
+				if not self.rect.colliderect(block.RDD):
+					self.grounded = True
+					self.y = block.tilemapy - player.height + 1
+					self.update()
+					break
+				elif self.fallspeed < 0:
+					self.fallspeed = 0
+
+	
+		if not self.grounded or self.fallspeed < 0:
+			self.fallspeed += 1
+			self.y += self.fallspeed
+		else:
+			self.fallspeed = 0
+
+	def resetCounter(self):
+		self.counter = 0
+
+	def updatehitboxes(self):
+		bottom = self.y + self.height
+		frame_idx = int(self.counter) % len(self.IShRN["hitbox"])
+		self.width = self.IShRN["hitbox"][frame_idx][0]
+		self.height = self.IShRN["hitbox"][frame_idx][1]
+		self.y = bottom - self.height
+		super().update()
+
+	def draw(self, r, l):
+		frame = int(self.counter) % len(self.IShRN["sprite"])
+		offset = -r if self.d == 1 else -l if self.d == 0 else 0
+		sam.blitwith(self.x + offset, self.y, self.IShRN["sprite"][frame])
+
+	def incrementCounter(self, by):
+		self.counter += by * 2 if self.run else by
+		if self.counter >= len(self.IShRN["hitbox"]):
+			self.counter = 0
+
+
+class Player(NPC):
+	def __init__(self, x, y, infosheet_sr, infosheet_sl, infosheet_wr, infosheet_wl, D):
+		self.run = False
+		self.inventar = [None, None, None, None, None, None, None, None, None, None]
+		self.interacted = 0
+		super().__init__(x, y, infosheet_sr, infosheet_sl, infosheet_wr, infosheet_wl, D)
 
 	def move(self, speed, room):
 		global camerax, cameray
@@ -262,32 +311,9 @@ class Player(hitbox):
 		if (keys[K_w] or keys[K_SPACE]) and self.grounded:
 			self.fallspeed = -10
 
-		self.gravitate(room)
+		self.Update(room)
 		self.interact(room)
 		self.interacted = False
-		self.updatehitboxes()
-	
-
-	
-	def gravitate(self, room):
-		global cameray, camerax
-		self.grounded = False
-		for block in room:
-			if self.collides(block) and block.id != 1:
-				if not self.rect.colliderect(block.RDD):
-					self.grounded = True
-					self.y = block.tilemapy - player.height + 1
-					self.update()
-					break
-				elif self.fallspeed < 0:
-					self.fallspeed = 0
-
-	
-		if not self.grounded or self.fallspeed < 0:
-			self.fallspeed += 1
-			self.y += self.fallspeed
-		else:
-			self.fallspeed = 0
 
 	def interact(self, room):
 		for block in room:
@@ -295,29 +321,6 @@ class Player(hitbox):
 				if self.interacted == True:
 					block.activate(self)
 				window.blit(image.load("animations/arrow.png"), (250 if self.d == 1 else 249, 250 - image.load("animations/arrow.png").get_height() - 10))
-
-
-
-	def resetCounter(self):
-		self.counter = 0
-
-	def updatehitboxes(self):
-		bottom = self.y + self.height
-		frame_idx = int(self.counter) % len(self.IShRN["hitbox"])
-		self.width = self.IShRN["hitbox"][frame_idx][0]
-		self.height = self.IShRN["hitbox"][frame_idx][1]
-		self.y = bottom - self.height
-		super().update()
-
-	def draw(self, r, l):
-		frame = int(self.counter) % len(self.IShRN["sprite"])
-		offset = -r if self.d == 1 else -l if self.d == 0 else 0
-		sam.blitwith(self.x + offset, self.y, self.IShRN["sprite"][frame])
-
-	def incrementCounter(self, by):
-		self.counter += by * 2 if self.run else by
-		if self.counter >= len(self.IShRN["hitbox"]):
-			self.counter = 0
 
 class textbox:
 	def __init__(self, x, y, w, h, font, maincolor, textcolor, bordercolor):
