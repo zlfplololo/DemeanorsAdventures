@@ -138,14 +138,12 @@ class tilemap():
 			self.tiletexture = tilemap.frames[tilenumber]
 
 		def update(self):
-			global camerax, cameray
 			self.rect = Rect(self.tilemapx, self.tilemapy, self.width, self.height)
 			self.RDR = Rect(self.tilemapx + self.width + 1, self.tilemapy + 1, 2 if self.hitboxe else 0, self.height-1 if self.hitboxe else 0)
 			self.RDL = Rect(self.tilemapx-2, self.tilemapy+1, 2 if self.hitboxe else 0, self.height-1 if self.hitboxe else 0)
 			self.RDD = Rect(self.tilemapx, self.tilemapy+self.height, self.width if self.hitboxe else 0, 1 if self.hitboxe else 0)
 
 		def draw(self):
-			global camerax, cameray
 			self.update()
 			sam.blitwith(self.tilemapx, self.tilemapy, self.tiletexture)
 
@@ -172,7 +170,6 @@ class tilemap():
 			super().__init__(x, y, width, height, tilemap, 0, hitboxe)
 		
 		def draw(self):
-			global camerax, cameray
 			self.update()
 			sam.blitwith(self.tilemapx, self.tilemapy, self.sprite)
 
@@ -208,6 +205,7 @@ class NPC(hitbox):
 		self.d = D
 		self.counter = 0
 		self.IShRN = self.sr if D else self.sl
+		self.run = 0
 		super().__init__(x, y, self.IShRN["hitbox"][0][0], self.IShRN["hitbox"][0][1])
 
 	def Update(self, room):
@@ -221,7 +219,7 @@ class NPC(hitbox):
 			if self.collides(block) and block.id != 1:
 				if not self.rect.colliderect(block.RDD):
 					self.grounded = True
-					self.y = block.tilemapy - player.height + 1
+					self.y = block.tilemapy - self.height + 1
 					self.update()
 					break
 				elif self.fallspeed < 0:
@@ -264,7 +262,6 @@ class Player(NPC):
 		super().__init__(x, y, infosheet_sr, infosheet_sl, infosheet_wr, infosheet_wl, D)
 
 	def move(self, speed, room):
-		global camerax, cameray
 		right = False
 		left = False
 		rightid = 0.5
@@ -417,7 +414,16 @@ player_infosheets = {
 	       "sprite": Spritesheet("animations/Demeanor_wl.png", 4, 1, 18, 30, 54, 90).frames}
 }
 
+villager_infosheets = {
+	'sr': {'hitbox': [[9 * 3 + 3, 29 * 3], [9 * 3 + 3, 28 * 3]],
+	       "sprite": Spritesheet("animations/villager_sr.png", 2, 1, 18, 30, 54, 90).frames},
+	'sl': {'hitbox': [[9 * 3+1, 29 * 3], [9 * 3+1, 28 * 3]],
+	       "sprite": Spritesheet("animations/villager_sl.png", 2, 1, 18, 30, 54, 90).frames},				   
+}
+
 player = Player(250, 250, player_infosheets['sr'], player_infosheets['sl'], player_infosheets['wr'],
+	            player_infosheets['wl'], 1)
+villager = NPC(250, 250, villager_infosheets['sr'], villager_infosheets['sl'], player_infosheets['wr'],
 	            player_infosheets['wl'], 1)
 background = transform.scale(image.load("animations/sky.jpg"), (500, 500))
 cavebackgrounds = [[Surface(((15+1)*50, 2*50)), (7*50, 35*50)], [Surface((8*50, 50)), (11*50, 34*50)]]
@@ -485,8 +491,6 @@ inventory = [41, None, None, None, None, None, None, None, None, None]
 itemselected = 0
 names = [i.replace("⌂", " ") for i in open("item/liberte", 'r').read().replace("/ ", "⌂").split(" ")]
 Items = {i: [itemsprites[i], names[i]] for i in range(len(itemsprites))}
-camerax = 0
-cameray = 0
 
 mixer.music.load("background.mp3")
 mixer.music.set_volume(0.3)
@@ -590,8 +594,11 @@ while ran:
 		player.incrementCounter(0.1)
 		player.move(2, rooms[indexroom])
 		sam["x"] = player.x-250
-		sam["y"] = player.y-250
+		sam["y"] = player.y-(253 if int(player.counter) % len(player.IShRN["hitbox"]) == 1 and (player.IShRN == player.sl or player.IShRN == player.sr) else 250)
+		villager.incrementCounter(0.1)
+		villager.Update(rooms[indexroom])
 	player.draw(10, 14)
+	villager.draw(10, 10)
 
 	if ismenue:
 		if not issettings:
